@@ -1,0 +1,66 @@
+# Operating System Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE Files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.komodoproject
+.komodotools/
+.eclipse/
+.settings/
+.project
+.buildpath
+.cache
+
+# Node/NPM/Yarn (if you используете сборщики)
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Composer (если используете)
+vendor/
+composer.lock
+
+# WordPress Plugin specific
+*.log
+*.sql
+*.sqlite
+.htaccess
+.env
+.env.*
+!.env.example
+
+# Build/Deploy files (если используете сборку)
+/dist/
+/build/
+.tmp/
+*.zip
+
+# Test coverage
+/coverage/
+.phpunit.result.cache
+
+# Development specific
+/dev-config.php
+local-config.php
+wp-config.local.php
+config.local.php
+
+# Temporary files
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+
+# Documentation specific
+/docs/_site/
+/docs/.sass-cache/

@@ -1,6 +1,8 @@
-# sr-wc-integration
 
-# SalesRender WooCommerce Integration
+
+
+
+# SalesRender WooCommerce Integration - sr-wc-integration
 
 Integration plugin for WooCommerce with SalesRender CRM and OPN Payment Gateway. This plugin provides a streamlined checkout process with product selection, customer information collection, and secure payment processing.
 
@@ -13,6 +15,57 @@ Integration plugin for WooCommerce with SalesRender CRM and OPN Payment Gateway.
 - Multi-variant product selection (1x, 2x, 3x, 4x packages)
 - Customizable form fields for customer and shipping information
 - Thailand-specific phone number format support
+
+## Schema
+
+```mermaid
+graph TB
+    subgraph WordPress
+        WC[WooCommerce]
+        Plugin[SR Integration Plugin]
+        Orders[Orders Database]
+    end
+
+    subgraph Frontend Flow
+        A[Customer Visit] --> B[Product Selection Page]
+        B --> C[Form Fields]
+        C --> D[Shipping Info]
+        D --> E[Payment Form]
+        E --> F[Order Creation]
+    end
+
+    subgraph Payment Process
+        E --> OPN[OPN Payment Gateway]
+        OPN --> |3D Secure| H[Bank Verification]
+        H --> |Success| I[Payment Confirmation]
+        H --> |Failure| J[Payment Failed]
+    end
+
+    subgraph Order Processing
+        F --> |Create Order| WC
+        WC --> |Save| Orders
+        Orders --> |Sync| Plugin
+        Plugin --> |GraphQL API| SR[SalesRender CRM]
+    end
+
+    subgraph Status Sync
+        SR --> |Status Update| Plugin
+        Plugin --> |Update Status| WC
+        WC --> |Notify| Customer[Customer Email]
+    end
+
+    subgraph Admin Interface
+        Admin[WordPress Admin] --> Settings[Plugin Settings]
+        Settings --> |Configure| Plugin
+        Settings --> |API Keys| OPN
+        Settings --> |CRM Settings| SR
+    end
+
+    style WC fill:#f9f,stroke:#333,stroke-width:2px
+    style Plugin fill:#bbf,stroke:#333,stroke-width:2px
+    style SR fill:#bfb,stroke:#333,stroke-width:2px
+    style OPN fill:#fbf,stroke:#333,stroke-width:2px
+```
 
 ## Requirements
 
