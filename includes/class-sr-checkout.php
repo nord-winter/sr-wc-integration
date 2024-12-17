@@ -83,6 +83,25 @@ class SR_Checkout
         }
     }
 
+    private function get_opn_params()
+    {
+        $settings = new SR_Settings();
+        $credentials = $settings->get_api_credentials();
+
+        return array(
+            'public_key' => $credentials['public_key'],
+            'shop_name' => get_bloginfo('name'),
+            'shop_logo' => get_site_icon_url(),
+            'locale' => determine_locale(),
+            'currency' => get_woocommerce_currency(),
+            'i18n' => array(
+                'pay_button' => __('Pay Now', 'sr-integration'),
+                'processing' => __('Processing...', 'sr-integration'),
+                'scan_qr' => __('Scan QR Code', 'sr-integration')
+            )
+        );
+    }
+
     /**
      * Register custom checkout endpoint
      */
@@ -223,13 +242,39 @@ class SR_Checkout
             'ajax_url' => admin_url('admin-ajax.php'),
             'is_mobile' => wp_is_mobile(),
             'currency_symbol' => get_woocommerce_currency_symbol(),
-            'package_data' => $this->get_package_data(),
+            'package_data' => array(
+                '1x' => array(
+                    'price' => 100.00,
+                    'quantity' => 10
+                ),
+                '2x' => array(
+                    'price' => 190.00,
+                    'quantity' => 20
+                ),
+                '3x' => array(
+                    'price' => 270.00,
+                    'quantity' => 30
+                ),
+                '4x' => array(
+                    'price' => 340.00,
+                    'quantity' => 40
+                )
+            ),
             'nonce' => wp_create_nonce('sr-checkout'),
             'i18n' => array(
                 'error_required' => __('This field is required.', 'sr-integration'),
                 'error_email' => __('Please enter a valid email address.', 'sr-integration'),
                 'error_phone' => __('Please enter a valid phone number.', 'sr-integration'),
                 'processing' => __('Processing...', 'sr-integration')
+            ),
+            'opn' => array(
+                'public_key' => $this->get_public_key(),
+                'shop_name' => get_bloginfo('name'),
+                'shop_logo' => get_site_icon_url(),
+                'i18n' => array(
+                    'pay_button' => __('Pay Now', 'sr-integration'),
+                    'processing' => __('Processing...', 'sr-integration')
+                )
             )
         ));
     }

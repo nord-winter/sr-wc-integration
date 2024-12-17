@@ -67,8 +67,10 @@
 
 /* Form Groups */
 .sr-form-group {
-    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
 }
+
 
 .sr-form-group label {
     display: block;
@@ -76,10 +78,18 @@
     color: #444;
 }
 
-.sr-form-group input,
 .sr-form-group select,
-.sr-form-group textarea {
-    width: 100%;
+.sr-form-group textarea,
+.sr-form-group option {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+
+}
+.sr-form-group input {
+    margin: 15px 0;
     padding: 8px 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -100,6 +110,15 @@
     display: grid;
     grid-template-columns: 100px 1fr;
     gap: 10px;
+}
+
+.sr-form-fd-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.sr-form-fd-row input {
+    margin-right: 10px;   
 }
 
 /* Error States */
@@ -192,4 +211,60 @@
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+
+.sr-payment-methods {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.sr-payment-method {
+    flex: 1;
+    padding: 15px;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sr-payment-method.active {
+    border-color: #2271b1;
+    background: rgba(34, 113, 177, 0.05);
+}
+
+.sr-method-icon {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.sr-method-title {
+    text-align: center;
+    font-weight: 500;
+}
+
+.sr-payment-form {
+    display: none;
+}
+
+.sr-payment-form.active {
+    display: block;
+}
+
+#card-element {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+}
+
+#card-errors {
+    color: #dc3232;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.promptpay-instructions {
+    margin-top: 20px;
 }
