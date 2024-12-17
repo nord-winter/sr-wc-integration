@@ -10,10 +10,14 @@
 
 defined('ABSPATH') || exit;
 
-class SR_WC_Integration {
+require_once __DIR__ . '/includes/class-sr-autoloader.php';
+SR_Autoloader::register();
+
+final class SR_WC_Integration {
     private static $instance = null;
     private $plugin_path;
     private $plugin_url;
+    private $version = '1.0.0'; 
     
     // Константы для статусов заказов
     const STATUS_NEW = 'sr-new';
@@ -31,17 +35,27 @@ class SR_WC_Integration {
     private function __construct() {
         $this->plugin_path = plugin_dir_path(__FILE__);
         $this->plugin_url = plugin_dir_url(__FILE__);
-        
-        // Подключение основных классов
+
+        // Initialize plugin after WooCommerce loads
+        add_action('plugins_loaded', array($this, 'init_plugin'));
+    }
+    private function init_other_components() {
+        // Инициализация других компонентов
         $this->includes();
         
-        // Инициализация хуков
-        $this->init_hooks();
+        // Инициализация чекаута
+        if (class_exists('SR_Checkout')) {
+            new SR_Checkout();
+        }
         
-        // Добавление настроек админки
-        if (is_admin()) {
-            add_action('admin_menu', array($this, 'add_admin_menu'));
-            add_action('admin_init', array($this, 'register_settings'));
+        // Инициализация синхронизации заказов
+        if (class_exists('SR_Order_Sync')) {
+            new SR_Order_Sync();
+        }
+        
+        // Инициализация платежного функционала
+        if (class_exists('SR_Payment')) {
+            new SR_Payment();
         }
     }
 
@@ -54,11 +68,11 @@ class SR_WC_Integration {
         require_once $this->plugin_path . 'includes/class-sr-checkout.php';
         require_once $this->plugin_path . 'includes/class-sr-order-sync.php';
         require_once $this->plugin_path . 'includes/class-sr-payment.php';
+        require_once $this->plugin_path . 'includes/admin/class-sr-settings.php';
         
         // Административные классы
         if (is_admin()) {
             require_once $this->plugin_path . 'includes/admin/class-sr-admin.php';
-            require_once $this->plugin_path . 'includes/admin/class-sr-settings.php';
         }
     }
 
@@ -79,21 +93,19 @@ class SR_WC_Integration {
     }
 
     public function init_plugin() {
-        // Проверка наличия WooCommerce
+        // Check if WooCommerce is active
         if (!class_exists('WooCommerce')) {
             add_action('admin_notices', function() {
-                echo '<div class="error"><p>SalesRender Integration requires WooCommerce to be installed and active.</p></div>';
+                echo '<div class="error"><p>' . 
+                     esc_html__('SalesRender Integration requires WooCommerce to be installed and active.', 'sr-integration') . 
+                     '</p></div>';
             });
             return;
         }
 
-        // Инициализация компонентов
-        new SR_Checkout();
-        new SR_Order_Sync();
-        new SR_Payment();
-
-        // Регистрация кастомных статусов заказов
-        $this->register_order_statuses();
+        // Initialize components
+        $this->init_payment_gateway();
+        $this->init_other_components();
     }
 
     public function enqueue_frontend_assets() {
@@ -112,6 +124,23 @@ class SR_WC_Integration {
                 'is_mobile' => wp_is_mobile()
             ));
         }
+    }
+
+    private function init_payment_gateway() {
+        if (class_exists('SR_OPN_Gateway')) {
+            SR_OPN_Gateway::init();
+        }
+    }
+
+    /**
+     * Admin notice for missing WooCommerce
+     */
+    public function woocommerce_missing_notice() {
+        ?>
+        <div class="error">
+            <p><?php esc_html_e('SalesRender Integration requires WooCommerce to be installed and active.', 'sr-integration'); ?></p>
+        </div>
+        <?php
     }
 
     private function register_order_statuses() {
@@ -144,6 +173,14 @@ class SR_WC_Integration {
 
     public function get_plugin_url() {
         return $this->plugin_url;
+    }
+        /**
+     * Get plugin version
+     *
+     * @return string
+     */
+    public function get_version() {
+        return $this->version;
     }
 }
 

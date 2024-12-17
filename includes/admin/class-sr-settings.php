@@ -54,6 +54,17 @@ class SR_Settings {
      */
     public function __construct() {
         add_action('admin_init', array($this, 'init_settings'));
+        if (false === get_option('sr_api_credentials')) {
+            update_option('sr_api_credentials', array(
+                'test_mode' => 'yes',
+                'public_key' => '',
+                'test_public_key' => '',
+                'secret_key' => '',
+                'test_secret_key' => '',
+                'webhook_secret' => '',
+                '3ds_enabled' => 'yes'
+            ));
+        }
     }
 
     /**

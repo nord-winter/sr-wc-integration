@@ -1,0 +1,149 @@
+/* Mobile Responsive Styles */
+@media screen and (max-width: 768px) {
+    .sr-checkout-container {
+        padding: 10px;
+    }
+
+    .sr-checkout-grid {
+        display: block;
+    }
+
+    .sr-section {
+        margin-bottom: 15px;
+        padding: 15px;
+    }
+
+    .sr-products-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Package Options */
+    .sr-package-option {
+        padding: 12px;
+    }
+
+    .sr-package-price {
+        font-size: 20px;
+    }
+
+    /* Form Groups */
+    .sr-form-row {
+        display: block;
+    }
+
+    .sr-form-group {
+        margin-bottom: 12px;
+    }
+
+    .sr-form-group + .sr-form-group {
+        margin-top: 0;
+    }
+
+    /* Phone Input */
+    .sr-phone-input {
+        grid-template-columns: 80px 1fr;
+        gap: 8px;
+    }
+
+    /* Order Summary */
+    .sr-order-summary {
+        margin: 15px 0;
+        padding: 15px;
+    }
+
+    .sr-summary-item {
+        padding: 8px 0;
+    }
+
+    .sr-summary-item.total {
+        font-size: 16px;
+    }
+
+    /* Payment Section */
+    #opn-form-container {
+        padding: 10px;
+    }
+
+    .sr-payment-methods {
+        flex-direction: column;
+    }
+
+    .sr-payment-method {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    /* Submit Button */
+    .sr-submit-button {
+        width: 100%;
+        padding: 14px;
+        font-size: 16px;
+    }
+
+    /* Form Fields */
+    .sr-input,
+    .sr-select,
+    .sr-textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 12px;
+    }
+
+    /* Error Messages */
+    .sr-field-error {
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    /* Loading States */
+    .sr-loading::after {
+        top: calc(50% - 15px);
+        left: calc(50% - 15px);
+        width: 30px;
+        height: 30px;
+    }
+
+    /* Sticky Order Summary */
+    .sr-order-summary.sticky {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    }
+
+    /* Progress Steps */
+    .sr-progress-steps {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 10px 0;
+    }
+
+    .sr-step {
+        display: inline-block;
+        margin-right: 20px;
+    }
+
+    /* Form Help Text */
+    .sr-form-help {
+        font-size: 11px;
+    }
+}
+
+/* iPhone SE and smaller devices */
+@media screen and (max-width: 375px) {
+    .sr-package-price {
+        font-size: 18px;
+    }
+
+    .sr-section {
+        padding: 12px;
+    }
+
+    .sr-submit-button {
+        padding: 12px;
+        font-size: 14px;
+    }
+}

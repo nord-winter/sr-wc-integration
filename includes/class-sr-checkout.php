@@ -3,7 +3,8 @@
  * Class SR_Checkout
  * Handles custom checkout functionality
  */
-class SR_Checkout {
+class SR_Checkout
+{
     /**
      * Settings instance
      * 
@@ -14,7 +15,8 @@ class SR_Checkout {
     /**
      * Constructor
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->settings = new SR_Settings();
 
         // Remove default WooCommerce checkout
@@ -26,7 +28,7 @@ class SR_Checkout {
         add_action('template_redirect', array($this, 'handle_checkout_endpoint'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_checkout_scripts'));
         add_filter('wc_get_template', array($this, 'override_checkout_template'), 10, 5);
-        
+
         // Ajax handlers
         add_action('wp_ajax_sr_update_package', array($this, 'update_package_selection'));
         add_action('wp_ajax_nopriv_sr_update_package', array($this, 'update_package_selection'));
@@ -38,11 +40,56 @@ class SR_Checkout {
     }
 
     /**
+     * Render product options (пакеты 1x, 2x, 3x, 4x)
+     */
+    private function render_product_options()
+    {
+        $packages = array(
+            '4x' => array(
+                'quantity' => 40,
+                'discount' => 15 // 15% скидка
+            ),
+            '3x' => array(
+                'quantity' => 30,
+                'discount' => 10 // 10% скидка
+            ),
+            '2x' => array(
+                'quantity' => 20,
+                'discount' => 5 // 5% скидка
+            ),
+            '1x' => array(
+                'quantity' => 10,
+                'discount' => 0 // без скидки
+            )
+        );
+
+        foreach ($packages as $type => $data) {
+            ?>
+            <div class="sr-package-option" data-package="<?php echo esc_attr($type); ?>">
+                <h3><?php printf(esc_html__('Package %s', 'sr-integration'), $type); ?></h3>
+                <div class="sr-package-quantity">
+                    <?php printf(esc_html__('%d units', 'sr-integration'), $data['quantity']); ?>
+                </div>
+                <?php if ($data['discount'] > 0): ?>
+                    <div class="sr-package-discount">
+                        <?php printf(esc_html__('Save %d%%', 'sr-integration'), $data['discount']); ?>
+                    </div>
+                <?php endif; ?>
+                <div class="sr-package-price" data-base-price="0">
+                    <!-- Цена будет установлена через JavaScript -->
+                </div>
+            </div>
+            <?php
+        }
+    }
+
+    /**
      * Register custom checkout endpoint
      */
-    public function register_checkout_endpoint() {
+    public function register_checkout_endpoint()
+    {
         add_rewrite_endpoint('sr-checkout', EP_PAGES);
-        
+
         if (get_option('sr_flush_rules', false)) {
             flush_rewrite_rules();
             delete_option('sr_flush_rules');
@@ -52,7 +99,8 @@ class SR_Checkout {
     /**
      * Handle custom checkout endpoint
      */
-    public function handle_checkout_endpoint() {
+    public function handle_checkout_endpoint()
+    {
         if (!is_page('checkout')) {
             return;
         }
@@ -67,9 +115,70 @@ class SR_Checkout {
     }
 
     /**
+     * Get public key for JS SDK
+     * 
+     * @return string
+     */
+    private function get_public_key()
+    {
+        $credentials = $this->settings->get_api_credentials();
+        return $this->is_test_mode() ?
+            $credentials['test_public_key'] ?? '' :
+            $credentials['public_key'] ?? '';
+    }
+
+    /**
+     * Check if test mode is enabled
+     * 
+     * @return bool
+     */
+    private function is_test_mode()
+    {
+        $credentials = $this->settings->get_api_credentials();
+        return ($credentials['test_mode'] ?? 'no') === 'yes';
+    }
+
+    /**
+     * Check if 3DS is enabled
+     * 
+     * @return bool
+     */
+    private function is_3ds_enabled()
+    {
+        $credentials = $this->settings->get_api_credentials();
+        return ($credentials['3ds_enabled'] ?? 'yes') === 'yes';
+    }
+
+    /**
+     * Render country options for select dropdown
+     */
+    private function render_country_options()
+    {
+        // Получаем список стран из WooCommerce
+        $countries = WC()->countries->get_allowed_countries();
+
+        $allowed_countries = array(
+            'TH' => 'Thailand',
+            // 'SG' => 'Singapore',
+            // 'MY' => 'Malaysia'
+        );
+        $countries = $allowed_countries; //TODO: add support for other countries
+
+        // Добавляем опции
+        foreach ($countries as $code => $name) {
+            printf(
+                '<option value="%s">%s</option>',
+                esc_attr($code),
+                esc_html($name)
+            );
+        }
+    }
+
+    /**
      * Enqueue checkout scripts and styles
      */
-    public function enqueue_checkout_scripts() {
+    public function enqueue_checkout_scripts()
+    {
         if (!is_page('checkout')) {
             return;
         }
@@ -91,12 +200,20 @@ class SR_Checkout {
                 SR_WC_Integration()->get_version()
             );
         }
+        // jQuery Validate
+        wp_enqueue_script(
+            'jquery-validate',
+            'https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js',
+            array('jquery'),
+            '1.19.5',
+            true
+        );
 
         // Scripts
         wp_enqueue_script(
             'sr-checkout',
             SR_WC_Integration()->get_plugin_url() . 'assets/js/checkout.js',
-            array('jquery'),
+            array('jquery', 'jquery-validate'),
             SR_WC_Integration()->get_version(),
             true
         );
@@ -127,7 +244,8 @@ class SR_Checkout {
      * @param string $default_path
      * @return string
      */
-    public function override_checkout_template($template, $template_name, $args, $template_path, $default_path) {
+    public function override_checkout_template($template, $template_name, $args, $template_path, $default_path)
+    {
         if ($template_name !== 'checkout/form-checkout.php') {
             return $template;
         }
@@ -143,7 +261,8 @@ class SR_Checkout {
     /**
      * Update package selection via Ajax
      */
-    public function update_package_selection() {
+    public function update_package_selection()
+    {
         check_ajax_referer('sr-checkout', 'nonce');
 
         $package_type = isset($_POST['package_type']) ? sanitize_text_field($_POST['package_type']) : '';
@@ -170,7 +289,8 @@ class SR_Checkout {
     /**
      * Validate checkout form fields via Ajax
      */
-    public function validate_checkout_form() {
+    public function validate_checkout_form()
+    {
         check_ajax_referer('sr-checkout', 'nonce');
 
         $fields = isset($_POST['fields']) ? (array) $_POST['fields'] : array();
@@ -219,7 +339,8 @@ class SR_Checkout {
     /**
      * Process checkout form submission
      */
-    public function process_checkout_form() {
+    public function process_checkout_form()
+    {
         if (!isset($_POST['sr_checkout_submit']) || !wp_verify_nonce($_POST['sr_checkout_nonce'], 'sr_checkout_process')) {
             return;
         }
@@ -255,10 +376,10 @@ class SR_Checkout {
             $product_id = absint($_POST['product_id']);
             $package_type = sanitize_text_field($_POST['package_type']);
             $quantity = $this->get_package_quantity($package_type);
-            
+
             $product = wc_get_product($product_id);
             $price = $this->settings->calculate_package_price($product->get_price(), $package_type);
-            
+
             $order->add_product($product, $quantity, array(
                 'subtotal' => $price * $quantity,
                 'total' => $price * $quantity
@@ -283,10 +404,11 @@ class SR_Checkout {
      * 
      * @return array
      */
-    private function get_package_data() {
+    private function get_package_data()
+    {
         $product_id = get_query_var('product-id', 0);
         $product = wc_get_product($product_id);
-        
+
         if (!$product) {
             return array();
         }
@@ -312,7 +434,8 @@ class SR_Checkout {
      * @param string $package_type
      * @return int
      */
-    private function get_package_quantity($package_type) {
+    private function get_package_quantity($package_type)
+    {
         $quantities = array(
             '1x' => 10,
             '2x' => 20,
@@ -329,7 +452,8 @@ class SR_Checkout {
      * @param string $template
      * @return string
      */
-    private function get_template_path($template) {
+    private function get_template_path($template)
+    {
         return SR_WC_Integration()->get_plugin_path() . 'templates/' . $template;
     }
 }

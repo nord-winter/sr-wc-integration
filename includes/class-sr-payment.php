@@ -48,7 +48,7 @@ class SR_Payment {
         // Enqueue our payment script
         wp_enqueue_script(
             'sr-payment',
-            SR_WC_Integration()->get_plugin_url() . 'assets/js/payment.js',
+            SR_WC_Integration()->get_plugin_url() . 'assets/js/opn-payment.js',
             array('jquery', 'opn-js'),
             SR_WC_Integration()->get_version(),
             true
